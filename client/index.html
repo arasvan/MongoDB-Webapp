@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Online Lesson Markeplace</title>
+    <link rel="stylesheet" href="graphics/main_style.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+</head>
+
+<body>
+
+    <!-- header -->
+    <div id="header"> <img src="graphics/header_img.png" alt="header"> </div>
+    <div id="logo"> <img src="graphics/logo_img.png" alt="logo"> </div>
+
+    <p id="header_txt"> Book lessons: </p>
+
+    <!-- vue app -->
+    <div id="app">
+
+        <!-- navigation buttons -->
+        <div id="navigation">
+            <a href="index.html"> <div id="lessons_btn" v-show="showCartButton"> <p>Lessons</p> </div> </a>
+            <a href="checkout.html"> <div id="checkout_btn" v-show="showCartButton"> <p>Checkout</p> </div> </a>
+        </div>
+
+        <!-- lesson table -->
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Subject</th>
+                    <th>Location</th>
+                    <th>Price</th>
+                    <th>Spaces</th>
+                    <th>Order</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="(lesson,i) in lessons">
+                    <td> <img v-bind:src="lesson.icon"> </td>
+                    <td> {{ lesson.subject }} </td>
+                    <td> {{ lesson.location }} </td>
+                    <td> {{ lesson.price }} </td>
+                    <td> {{ lesson.space }} </td>
+                    <td> <button v-on:click="addToCart(i)" :class="[`button${i}`]" v-show="(lesson.space > 0)"> Add to Cart </button> </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- sorting controls -->
+        <div id="sorting_controls">
+
+            Sort order:
+            <br><br>
+
+            <select v-model="sortParam" @change="sortLessons()">
+                <option>Subject</option>
+                <option>Location</option>
+                <option>Price</option>
+                <option>Availability</option>
+            </select>
+            <br><br>
+
+            Sort by:
+            <br><br>
+
+            <input type="radio" id="asc" value="asc" v-model="sortOrder" @change="sortLessons()">
+            <label for="asc">Ascending</label>
+            <br>
+            <input type="radio" id="dsc" value="dsc" v-model="sortOrder" @change="sortLessons()">
+            <label for="dsc">Descending</label>
+        </div>
+    </div>
+
+    <!-- vue scripts -->
+    <script>
+
+        let app = new Vue({
+            el: "#app",
+
+            data: {
+                lessons: [],
+                cart: [],
+                sortParam: "Subject",
+                sortOrder: "asc",
+                showCartButton: false
+            },
+
+            mounted() {
+
+                //load lessons from server to localstorage;
+
+                fetch("http://localhost:8080/lessons").then(function (response) {
+                    response
+                        .json()
+                        .then(function (json) {
+
+                            //load json;
+                            app.lessons = json;
+
+                            //send to localstorage;
+                            localStorage.lessons = JSON.stringify(app.lessons);
+
+                            //create or load shopping cart;
+                            if (!localStorage.cart) {
+                                var createCart = [];
+                                for (var i = 0; i < app.lessons.length; i++) { createCart[i] = 0; }
+                                localStorage.cart = JSON.stringify(createCart);
+                            }
+                            app.cart = JSON.parse(localStorage.cart);
+
+                            //check if anything is in cart;
+                            for (var i = 0; i < app.lessons.length; i++) { if (app.cart[i] != 0) { app.showCartButton = true; break; } }
+
+                            //sort;
+                            app.sortLessons();
+                        })
+                        .catch((error) => alert("Error ocurred: " + error.message));
+                });
+            },
+
+            //functions;
+
+            methods: {
+
+                //add to cart;
+
+                addToCart(index) {
+                    this.lessons[index].space--;
+                    localStorage.lessons = JSON.stringify(this.lessons);
+
+                    this.cart[index]++;
+                    localStorage.cart = JSON.stringify(this.cart);
+
+                    this.showCartButton = true;
+                    this.sortLessons();
+                },
+
+                //sort;
+
+                sortLessons() {
+
+                    var i = -1;
+
+                    while (i < this.lessons.length-2) {
+                        i++;
+
+                        var needToSwap;
+
+                        if (this.sortOrder === "dsc") {
+                            switch (this.sortParam) {
+                                case "Subject": needToSwap = (this.lessons[i].subject < this.lessons[i + 1].subject); break;
+                                case "Location": needToSwap = (this.lessons[i].location < this.lessons[i + 1].location); break;
+                                case "Price": needToSwap = (this.lessons[i].price < this.lessons[i + 1].price); break;
+                                case "Availability": needToSwap = (this.lessons[i].space-this.cart[i] < this.lessons[i + 1].space-this.cart[i+1]); break;
+                            }
+                        } else {
+                            switch (this.sortParam) {
+                                case "Subject": needToSwap = (this.lessons[i].subject > this.lessons[i + 1].subject); break;
+                                case "Location": needToSwap = (this.lessons[i].location > this.lessons[i + 1].location); break;
+                                case "Price": needToSwap = (this.lessons[i].price > this.lessons[i + 1].price); break;
+                                case "Availability": needToSwap = (this.lessons[i].space-this.cart[i] > this.lessons[i + 1].space-this.cart[i+1]); break;
+                            }
+                        }                 
+
+                        if (needToSwap) {
+                            var temp = this.lessons[i];
+                            this.lessons[i] = this.lessons[i + 1]
+                            this.lessons[i + 1] = temp;
+
+                            var temp = this.cart[i];
+                            this.cart[i] = this.cart[i + 1];
+                            this.cart[i + 1] = temp;
+
+                            i = -1;
+                        }
+                    }
+
+                    localStorage.lessons = JSON.stringify(this.lessons);
+                    localStorage.cart = JSON.stringify(this.cart);
+                }
+            }
+        })
+
+    </script>
+
+</body>
+
+</html >

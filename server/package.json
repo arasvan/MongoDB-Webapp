@@ -1,0 +1,17 @@
+{
+  "name": "cw2",
+  "version": "1.0.0",
+  "description": "10% lab work",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server",
+    "dev": "nodemon server"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "@types/node": "^14.6.0",
+    "nodemon": "^2.0.2"
+  }
+}
