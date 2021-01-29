@@ -90,7 +90,7 @@
 
                 //load lessons from server to localstorage;
 
-                fetch("http://localhost:8080/lessons").then(function (response) {
+                fetch("http://localhost:8080/collection/lessons").then(function (response) {
                     response
                         .json()
                         .then(function (json) {
