@@ -18,7 +18,13 @@ app.param('collectionName', (req, res, next, collectionName) => {
     return next();
 })
 
-
+app.use(function (req, res, next) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Headers', '*');
+    res.setHeader('Access-Control-Allow-Methods', '*');
+    console.log("Request " + req.method + " from [" + req.url + "] at " + new Date());
+    next();
+})
 
 var path = require("path");
 var fs = require("fs");
