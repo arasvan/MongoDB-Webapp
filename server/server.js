@@ -1,3 +1,5 @@
+//dependencies;
+
 const express = require("express");
 const app = express();
 
@@ -8,15 +10,21 @@ app.listen(PORT, console.log(`Server started. Port ${PORT}`));
 
 const mongoClient = require("mongodb").MongoClient;
 
+//connect mongodb;
+
 let db;
 mongoClient.connect('mongodb+srv://arasvan:219031@mycluster.ybtia.mongodb.net/', (err, client) => {
     db = client.db('cw2');
 })
 
+//setup 'collectionName' parameter;
+
 app.param('collectionName', (req, res, next, collectionName) => {
     req.collection = db.collection(collectionName);
     return next();
 })
+
+//logger middleware;
 
 app.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -25,6 +33,8 @@ app.use(function (req, res, next) {
     console.log("Request " + req.method + " from [" + req.url + "] at " + new Date());
     next();
 })
+
+//image loader middleware
 
 var path = require("path");
 var fs = require("fs");
@@ -41,8 +51,7 @@ app.use(function (req, res, next) {
     })
 })
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+//get method;
 
 app.get('/collection/:collectionName', (req, res, next) => {
     req.collection.find({}).toArray((e, results) => {
@@ -51,12 +60,19 @@ app.get('/collection/:collectionName', (req, res, next) => {
     })
 })
 
+//post method;
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
 app.post('/collection/:collectionName', (req, res, next) => {
     req.collection.insertOne(req.body, (e, results) => {
         if (e) return next(e);
         res.send(results.ops);
     })
 })
+
+//update lesson database method;
 
 const ObjectID = require("mongodb").ObjectID;
 app.put('/collection/:collectionName/:id', (req, res, next) => {
