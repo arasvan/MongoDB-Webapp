@@ -9,8 +9,8 @@
 <body>
 
     <!-- header -->
-    <div id="header"> <img src="graphics/header_img.png" alt="header"> </div>
-    <div id="logo"> <img src="graphics/logo_img.png" alt="logo"> </div>
+    <div id="header"> <img src="http://localhost:3000/header_img.png" alt="header"> </div>
+    <div id="logo"> <img src="http://localhost:3000/logo_img.png" alt="logo"> </div>
 
     <!-- vue app -->
     <div id="app">
@@ -152,7 +152,7 @@
                         'customer_name': this.name,
                         'customer_phone': this.phone,
                         'lesson_ids': [],
-                        'lesson_qty': []
+                        'lesson_spaces': []
                     }
 
                     for (var i = 0; i < this.cart.length; i++) {
@@ -160,7 +160,7 @@
                         if (this.cart[i] != 0) {
 
                             new_order.lesson_ids.push(this.lessons[i]._id);
-                            new_order.lesson_qty.push(this.cart[i]);
+                            new_order.lesson_spaces.push(this.cart[i]);
 
                             fetch('http://localhost:3000/collection/lessons/' + this.lessons[i]._id, {
                                 method: 'PUT',
@@ -190,7 +190,7 @@
 
                     localStorage.clear();
                     alert("You have successfully spent £" + this.price + "!");
-                    //window.location.href = "index.html";
+                    window.location.href = "index.html";
                 },
 
                 //get nr of lessons booked;

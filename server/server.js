@@ -18,11 +18,21 @@ app.param('collectionName', (req, res, next, collectionName) => {
     return next();
 })
 
+
+
+var path = require("path");
+var fs = require("fs");
+
 app.use(function (req, res, next) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Headers', '*');
-    res.setHeader('Access-Control-Allow-Methods', '*');
-    next();
+    var fpath = path.join(__dirname, "static", req.url);
+    fs.stat(fpath, (err, finfo) => {
+        if (err) {
+            next();
+            return;
+        }
+        if (finfo.isFile()) res.sendFile(fpath);
+        else next();
+    })
 })
 
 app.use(bodyParser.json());
