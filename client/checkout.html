@@ -148,12 +148,16 @@
                 //place order;
                 placeOrder() {
 
+                    //create order json;
+
                     var new_order = {
                         'customer_name': this.name,
                         'customer_phone': this.phone,
                         'lesson_ids': [],
                         'lesson_spaces': []
                     }
+
+                    //loop through cart, add lesson ids to order object;
 
                     for (var i = 0; i < this.cart.length; i++) {
 
@@ -175,6 +179,8 @@
                                 })
                         }
                     }
+
+                    //add order to database;
 
                     fetch('http://localhost:3000/collection/orders', {
                         method: 'POST',
