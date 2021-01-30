@@ -154,10 +154,25 @@
                         'lesson_ids': [],
                         'lesson_qty': []
                     }
+
                     for (var i = 0; i < this.cart.length; i++) {
+
                         if (this.cart[i] != 0) {
+
                             new_order.lesson_ids.push(this.lessons[i]._id);
                             new_order.lesson_qty.push(this.cart[i]);
+
+                            fetch('http://localhost:3000/collection/lessons/' + this.lessons[i]._id, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify(this.lessons[i]),
+                            })
+                                .then(response => response.json())
+                                .then(responseJSON => {
+                                    console.log("Success! ", responseJSON);
+                                })
                         }
                     }
 
@@ -170,12 +185,12 @@
                     })
                         .then(response => response.json())
                         .then(responseJSON => {
-                            console.log("yeah boiiii", responseJSON);
+                            console.log("Success! ", responseJSON);
                         })
 
                     localStorage.clear();
                     alert("You have successfully spent £" + this.price + "!");
-                    window.location.href = "index.html";
+                    //window.location.href = "index.html";
                 },
 
                 //get nr of lessons booked;
