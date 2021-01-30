@@ -90,32 +90,30 @@
 
                 //load lessons from server to localstorage;
 
-                fetch("http://localhost:8080/collection/lessons").then(function (response) {
-                    response
-                        .json()
-                        .then(function (json) {
+                fetch("http://localhost:3000/collection/lessons").then(function (response) {
+                    response.json().then(function (json) {
 
-                            //load json;
-                            app.lessons = json;
+                        //load json;
+                        app.lessons = json;
 
-                            //send to localstorage;
-                            localStorage.lessons = JSON.stringify(app.lessons);
+                        //send to localstorage;
+                        localStorage.lessons = JSON.stringify(app.lessons);
 
-                            //create or load shopping cart;
-                            if (!localStorage.cart) {
-                                var createCart = [];
-                                for (var i = 0; i < app.lessons.length; i++) { createCart[i] = 0; }
-                                localStorage.cart = JSON.stringify(createCart);
-                            }
-                            app.cart = JSON.parse(localStorage.cart);
+                        //create or load shopping cart;
+                        if (!localStorage.cart) {
+                            var createCart = [];
+                            for (var i = 0; i < app.lessons.length; i++) { createCart[i] = 0; }
+                            localStorage.cart = JSON.stringify(createCart);
+                        }
+                        app.cart = JSON.parse(localStorage.cart);
 
-                            //check if anything is in cart;
-                            for (var i = 0; i < app.lessons.length; i++) { if (app.cart[i] != 0) { app.showCartButton = true; break; } }
+                        //check if anything is in cart;
+                        for (var i = 0; i < app.lessons.length; i++) { if (app.cart[i] != 0) { app.showCartButton = true; break; } }
 
-                            //sort;
-                            app.sortLessons();
-                        })
-                        .catch((error) => alert("Error ocurred: " + error.message));
+                        //sort;
+                        app.sortLessons();
+                    })
+                        .catch((error) => alert("error ocurred: " + error.message));
                 });
             },
 

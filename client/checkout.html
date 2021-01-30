@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Online Lesson Markeplace</title>
+    <link rel="stylesheet" href="graphics/main_style.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+</head>
+
+<body>
+
+    <!-- header -->
+    <div id="header"> <img src="graphics/header_img.png" alt="header"> </div>
+    <div id="logo"> <img src="graphics/logo_img.png" alt="logo"> </div>
+
+    <!-- vue app -->
+    <div id="app">
+
+        <p id="header_txt"> Total cost: £{{ price }} </p>
+
+        <!-- navigation buttons -->
+        <div id="navigation">
+            <a href="index.html"> <div id="lessons_btn"> <p>Lessons</p> </div> </a>
+            <a href="checkout.html"> <div id="checkout_btn"> <p>Checkout</p> </div> </a>
+        </div>
+
+        <!-- lesson table -->
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Subject</th>
+                    <th>Location</th>
+                    <th>Price</th>
+                    <th>Booked</th>
+                    <th>Cancel</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="(lesson,i) in lessons" v-if="cart[i]>0">
+                    <td> <img v-bind:src="lesson.icon"> </td>
+                    <td> {{ lesson.subject }} </td>
+                    <td> {{ lesson.location }} </td>
+                    <td> {{ lesson.price }} </td>
+                    <td> {{ getBooked(i) }} / {{ lesson.space + getBooked(i) }} </td>
+                    <td> <button v-on:click="removeFromCart(i)" :class="[`button${i}`]"> Remove </button> </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- user input -->
+        <div id="user_input">
+
+            Enter your details
+            <br>
+            to book these lessons:
+            <br><br>
+
+            <p><u>Enter your name: </u></p>
+            <input id="input_name" v-model="name" placeholder="Letters only" @keydown="isValidName">
+            <p><u>Enter your phone number: </u></p>
+            <input id="input_phone" v-model="phone" placeholder="Numbers only" @keydown="isValidPhone">
+
+            <div id="order_btn" v-on:click="placeOrder()" v-show="showOrderButton"> <p>Order!</p> </div>
+        </div>
+
+    </div>
+
+    <!-- vue scripts -->
+    <script>
+
+        let app = new Vue({
+            el: "#app",
+
+            data: {
+                lessons: [],
+                cart: [],
+                name: "",
+                phone: "",
+                price: 0,
+                showOrderButton: false
+            },
+
+            mounted() {
+
+                //load lessons from lessons.js to localstorage;
+                if (!localStorage.lessons) { localStorage.lessons = loadFromJS(); }
+                this.lessons = JSON.parse(localStorage.lessons);
+
+                //create or load shopping cart;
+                if (!localStorage.cart) {
+                    var createCart = [];
+                    for (var i = 0; i < this.lessons.length; i++) { createCart[i] = 0; }
+                    localStorage.cart = JSON.stringify(createCart);
+                }
+                this.cart = JSON.parse(localStorage.cart);
+
+                //get lessons price;
+                this.updatePrice();
+            },
+
+            methods: {
+
+                //remove from cart;
+                removeFromCart(index) {
+                    this.lessons[index].space++;
+                    localStorage.lessons = JSON.stringify(this.lessons);
+
+                    this.cart[index]--;
+                    localStorage.cart = JSON.stringify(this.cart);
+
+                    this.updatePrice();
+
+                    for (var i = 0; i < this.lessons.length; i++) { if (this.cart[i] != 0) { return true; } }
+                    window.location.href = "index.html";
+                },
+
+                //validate name;
+                isValidName(event) {
+                    const char = String.fromCharCode(event.keyCode);
+                    if (!/^[a-zA-Z._\b\s]+$/.test(char)) {
+                        event.preventDefault();
+                    }
+                    this.enableOrderButton();
+                },
+
+                //validate phone number;
+                isValidPhone(event) {
+                    const char = String.fromCharCode(event.keyCode);
+                    if (!/^[0-9._\b]+$/.test(char)) {
+                        event.preventDefault();
+                    }
+                    this.enableOrderButton();
+                },
+
+                //enable order button;
+                enableOrderButton() {
+                    this.showOrderButton = (!((!this.name || 0 === this.length) || (!this.phone || 0 === this.length)));
+                },
+
+                //get lessons price;
+                updatePrice() {
+                    this.price = 0;
+                    for (var i = 0; i < this.lessons.length; i++) {
+                        this.price += this.lessons[i].price * this.cart[i];
+                    }
+                },
+
+                //place order;
+                placeOrder() {
+
+                    var new_order = {
+                        'customer_name': this.name,
+                        'customer_phone': this.phone,
+                        'lesson_ids': [],
+                        'lesson_qty': []
+                    }
+                    for (var i = 0; i < this.cart.length; i++) {
+                        if (this.cart[i] != 0) {
+                            new_order.lesson_ids.push(this.lessons[i]._id);
+                            new_order.lesson_qty.push(this.cart[i]);
+                        }
+                    }
+
+                    fetch('http://localhost:3000/collection/orders', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(new_order),
+                    })
+                        .then(response => response.json())
+                        .then(responseJSON => {
+                            console.log("yeah boiiii", responseJSON);
+                        })
+
+                    localStorage.clear();
+                    alert("You have successfully spent £" + this.price + "!");
+                    window.location.href = "index.html";
+                },
+
+                //get nr of lessons booked;
+                getBooked(index) {
+                    return this.cart[index];
+                }
+            }
+        })
+
+    </script>
+
+</body>
+
+</html>
