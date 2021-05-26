@@ -1,4 +1,4 @@
-# Web abb connected to a MongoDB database;
+# Web app connected to a MongoDB database;
 
 This is a simple web app I made as part of my course;
 
