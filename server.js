@@ -13,7 +13,7 @@ const mongoClient = require("mongodb").MongoClient;
 //connect mongodb;
 
 let db;
-mongoClient.connect('mongodb+srv://arasvan:219031@mycluster.ybtia.mongodb.net/', (err, client) => {
+mongoClient.connect('mongodb+srv://removed_for_security_reasons@mycluster.ybtia.mongodb.net/', (err, client) => {
     db = client.db('cw2');
 })
 
